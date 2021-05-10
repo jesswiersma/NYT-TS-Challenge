@@ -1,4 +1,7 @@
-import React, {Component} from 'react'
+import React, {Component} from 'react';
+import {MouseEvent} from 'react';
+import NytDisplay from './NytDisplay';
+
 
 type NytState = {
     searchTerm: string;
@@ -6,6 +9,12 @@ type NytState = {
     endDate: string;
     pageNumber: number;
     results: [];
+    button: boolean;
+}
+
+type URL = {
+    base: string;
+    key: string;
 }
 
 class NytSearch extends Component<{}, NytState> {
@@ -16,25 +25,33 @@ class NytSearch extends Component<{}, NytState> {
             startDate: "",
             endDate: "",
             pageNumber: 0,
-            results: []
+            results: [],
+            button: true,
         }
     }
 
 
 fetchSearchResults() {
-    const baseURL = `https://api.nytimes.com/svc/search/v2/articlesearch.json`;
-    const apiKey = `JZxP8LokooAIcc14fPtvkQX6AaRFUiaY`;
+    const baseURL = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
+    const apiKey = "ZDXv9IaKUQft4T0WzkIePcY3QLsQqA0k";
+    let pageNumber = this.state.pageNumber === 0 ? 0 : this.state.pageNumber;
 
     let url = `${baseURL}?api-key=${apiKey}&page=${this.state.pageNumber}&q=${this.state.searchTerm}`;
-        //url = this.state.startDate ? url + `&begin_date=${this.state.startDate}` : url;
-        //url = this.state.endDate ? url + `&end_date=${this.state.endDate}` : url;
+    url = this.state.startDate ? url + `&begin_date=${this.state.startDate}` : url;
+        url = this.state.endDate ? url + `&end_date=${this.state.endDate}` : url;
 
-    fetch(url)
-        .then((res) => res.json())
-        .then((data) => this.setState({results: data.response.docs}))  
+        fetch(url)
+        .then(res => res.json())
+        .then(data => this.setState({results: data.response.docs}))
         .catch(err => console.log(err))
-        return console.log(this.state.results)              
+        return console.log(this.state.results)
     };
+
+    searchResults(){
+        this.setState({pageNumber: 0});
+        console.log(this.state.pageNumber);
+        this.fetchSearchResults()
+    }
 
     handleSubmit(event:any) {
         this.setState({
@@ -42,6 +59,19 @@ fetchSearchResults() {
         })
         this.fetchSearchResults();
         event.preventDefault();
+    }
+
+    changePageNumber(event: MouseEvent, direction: string) {
+        event.preventDefault()
+        if(direction === 'down'){
+            if(this.state.pageNumber > 0) {
+                this.setState({pageNumber: this.state.pageNumber -1})
+                this.fetchSearchResults()
+            }
+        } if(direction === 'up'){
+            this.setState({pageNumber: this.state.pageNumber +1})
+            this.fetchSearchResults()
+        }
     }
 
     componentDidMount(){
@@ -64,10 +94,14 @@ render(){
                     <br/>
                     <button className = "submit">Submit Search</button>
              </form>
+             <NytDisplay results={this.state.results} pages = {this.changePageNumber}/>
+
+             <div>
+                 <button onClick = {(e) => this.changePageNumber(e, "down")}>Previous 10</button>
+                 <button onClick = {(e) => this.changePageNumber(e, "up")}>Next 10</button>
+             </div>
          </div>
 
-            //     <NytResults results = {results} changePage = {changePageNumber}
-             
     )
 }
 }

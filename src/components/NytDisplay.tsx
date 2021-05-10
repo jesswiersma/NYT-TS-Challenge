@@ -9,7 +9,7 @@ type Article = {
     headline: any,
     web_url: string,
     multimedia: string,
-    keywords: [],
+    snippet: string,
 }
 
 const NytDisplay = (props: MyProps) => {
@@ -19,6 +19,7 @@ const NytDisplay = (props: MyProps) => {
                 return (
                     <div>
                         <a href={article.web_url}><h3>{article.headline.main}</h3></a>
+                        <p>{article.snippet}</p>
                     </div>
                 )
             })}
